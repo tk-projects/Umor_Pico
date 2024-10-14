@@ -41,7 +41,15 @@ project(umor_pico C CXX ASM)
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
-add_executable(umor_pico umor_pico.cpp)
+add_executable(umor_pico umor_pico.cpp
+    /Users/tilman/pico-sdk/lib/RadioLib/src/modules/SX126x/SX1262.cpp
+    /Users/tilman/pico-sdk/lib/RadioLib/src/modules/SX126x/SX126x.cpp
+    /Users/tilman/pico-sdk/lib/RadioLib/src/protocols/PhysicalLayer/PhysicalLayer.cpp
+    /Users/tilman/pico-sdk/lib/RadioLib/src/Module.cpp
+    /Users/tilman/pico-sdk/lib/RadioLib/src/modules/SX126x/SX126x_LR_FHSS.cpp
+    /Users/tilman/pico-sdk/lib/RadioLib/src/utils/CRC.cpp
+    /Users/tilman/pico-sdk/lib/RadioLib/src/utils/FEC.cpp
+)
 
 pico_set_program_name(umor_pico "umor_pico")
 pico_set_program_version(umor_pico "0.1")
@@ -51,8 +59,12 @@ pico_enable_stdio_uart(umor_pico 0)
 pico_enable_stdio_usb(umor_pico 1)
 
 
-# Add the standard library to the build
-target_link_libraries(umor_pico pico_stdlib)
+# Add the LoRa lib
+target_link_libraries(umor_pico pico_stdlib
+                    /Users/tilman/pico-sdk/lib/RadioLib/build/libRadioLib.a
+)
+
+target_include_directories(umor_pico PRIVATE /Users/tilman/pico-sdk/lib/RadioLib/src)
 
 # Add the standard include files to the build
 target_include_directories(umor_pico PRIVATE
@@ -69,8 +81,17 @@ target_include_directories(umor_pico PRIVATE
   ${PICO_SDK_PATH}/src/rp2040/hardware_timer/include
   ${PICO_SDK_PATH}/src/rp2040/hardware_watchdog/include
   ${PICO_SDK_PATH}/src/rp2040/hardware_clocks/include
-  /Users/tilman/pico-sdk/lib/lwip/src/include/lwip # Added for lwipopts.h
+  /Users/tilman/pico-sdk/lib/lwip/src/include # Added for lwipopts.h
+  /Users/tilman/pico-sdk/lib/RadioLib/examples/NonArduino/Pico/ # Added for PicoHal.h
+  /Users/tilman/pico-sdk/src/rp2_common/hardware_pwm/include # Added to get all the hardware libs of rp2040
+  /Users/tilman/pico-sdk/src/rp2_common/pico_multicore/include
 )
+
+target_sources(umor_pico PRIVATE /Users/tilman/pico-sdk/lib/RadioLib/src/Hal.cpp
+/Users/tilman/pico-sdk/lib/RadioLib/src/modules/SX126x/SX1262.h        
+)
+
+
 
 # Add any user requested libraries
 target_link_libraries(umor_pico 
@@ -80,6 +101,8 @@ target_link_libraries(umor_pico
         hardware_watchdog
         hardware_clocks
         hardware_spi
+        hardware_pwm
+        pico_multicore
 )
 
 if (PICO_CYW43_SUPPORTED)
